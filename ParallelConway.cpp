@@ -1,6 +1,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <array>
 #include <mpi.h>
 
 using namespace std;
@@ -202,6 +203,45 @@ void Print(vector<int>&m){
     }
     cout<<endl;
 }
+void Print(vector<int>m,int rows, int columns){
+    int r = 1;
+    for(int i=0 ; i<rows*columns;i+=columns ){
+        vector<int> tmp;
+        for(int j =i;j<columns*r;j++){
+            cout<<m[j]<<", ";
+        }
+        cout<<endl;
+        r++;
+    }
+    cout<<endl;
+}
+vector<int> convert2dTo1D(vector<vector<int>>&board,int rows,int columns){
+    vector<int> Board(rows*columns);
+    int pos = 0;
+    for(int i =0;i<rows;i++){
+
+        for(int j=0;j< columns; j++){
+            Board[pos] = board[i][j];
+            pos++;
+        }
+    }
+    return Board;
+}
+
+vector<vector<int>> convert1dT2D(vector<int> ptr,int rows,int columns){
+    vector<vector<int>> Board;
+    int r=1;
+    for(int i=0 ; i<rows*columns;i+=columns ){
+        vector<int> tmp;
+        for(int j =i;j<columns*r;j++){
+            tmp.push_back(ptr[j]);
+        }
+        r++;
+        Board.push_back(tmp);
+    }
+    return Board;
+}
+
 int main(int argc, char * argv[]){
     NumProcesses =  atoi(argv[1]);
     rows =  atoi(argv[2]);
@@ -211,15 +251,18 @@ int main(int argc, char * argv[]){
     int processID;
     MPI_Comm_rank(MPI_COMM_WORLD, &processID);
     offset = columns/NumProcesses;
-    // vector<vector<int>>b = board;
+    vector<int> arr(rows*columns);
+    vector<vector<int>> newBoard(rows,vector<int>(columns));
     int startPos = 0;
     int endPos = offset;
     if(processID != 0){
         startPos = processID * offset;
         endPos = startPos + offset;
     }
-    for(int iteration=0;iteration<1;iteration++){
-    vector<vector<int>> newBoard(rows,vector<int>(columns));
+    for(int iteration=0;iteration<5;iteration++){
+        if(iteration >= 1 && processID != 0){
+            board = convert1dT2D(arr,rows,columns);
+        }
         int Result [offset*columns];
         int index = 0;
         for(int i = startPos; i <endPos; i++){
@@ -279,8 +322,9 @@ int main(int argc, char * argv[]){
             }
             board = newBoard;
             PrintBoard(newBoard,iteration);
+            arr = convert2dTo1D(newBoard,rows,columns);
         }
-        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Bcast(&arr[0],rows*columns,MPI_INT,0,MPI_COMM_WORLD);
         
     }
 
