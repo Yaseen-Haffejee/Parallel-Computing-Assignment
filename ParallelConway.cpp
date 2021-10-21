@@ -206,79 +206,83 @@ int main(int argc, char * argv[]){
     NumProcesses =  atoi(argv[1]);
     rows =  atoi(argv[2]);
     columns = atoi(argv[3]);
-    vector<vector<int>> newBoard(rows,vector<int>(columns));
-    int next,offset;
+    int offset;
     MPI_Init(&argc, &argv);
     int processID;
     MPI_Comm_rank(MPI_COMM_WORLD, &processID);
     offset = columns/NumProcesses;
-    if(processID == NumProcesses -1 ){
-        next = 0;
-    }
-    else{
-        next = processID + 1;
-    }
-   
-    vector<vector<int>>Result;
-    vector<vector<int>>b = board;
+    // vector<vector<int>>b = board;
     int startPos = 0;
     int endPos = offset;
     if(processID != 0){
         startPos = processID * offset;
         endPos = startPos + offset;
     }
-    for(int i = startPos; i <endPos; i++){
-        vector<int>nextGen(columns);
-        for(int j = 0; j < columns; j++){
-            int aliveNeighbours = NumberOfLiveNeighbours(b,i,j,rows,columns);
-            // if the cell is alive with two or three neighbours, it remains alive
-            if(b[i][j]==1 &&(aliveNeighbours ==2 || aliveNeighbours ==3)){
-                nextGen[j] = 1;
-            }
-            // if the cell is dead but has three alive neighbours, it is born in the next generation
-            else if(b[i][j]==0 && aliveNeighbours ==3){
-                nextGen[j] = 1;
-            }
-            // Cell is alive and has more than 3 neighbours or less than three then it dies 
-            else{
+    for(int iteration=0;iteration<1;iteration++){
+    vector<vector<int>> newBoard(rows,vector<int>(columns));
+        int Result [offset*columns];
+        int index = 0;
+        for(int i = startPos; i <endPos; i++){
+            for(int j = 0; j < columns; j++){
+                int aliveNeighbours = NumberOfLiveNeighbours(board,i,j,rows,columns);
+                // if the cell is alive with two or three neighbours, it remains alive
+                if(board[i][j]==1 &&(aliveNeighbours ==2 || aliveNeighbours ==3)){
+                    Result[index] = 1;
+                }
+                // if the cell is dead but has three alive neighbours, it is born in the next generation
+                else if(board[i][j]==0 && aliveNeighbours ==3){
+                    Result[index] = 1;
+                }
+                // Cell is alive and has more than 3 neighbours or less than three then it dies 
+                else{
 
-                nextGen[j] = 0;
+                    Result[index] = 0;
+                }
+                index ++;
             }
-            
         }
-        Result.push_back(nextGen);
-        Print(nextGen);
-    }
 
-    if(processID != 0){
-        // MPI_Send(&(Result[0][0]),offset*columns,MPI_INT, 0,1,MPI_COMM_WORLD);
-        MPI_Send(&(Result[0][0]),offset*columns,MPI_INT, 0,1,MPI_COMM_WORLD);
-        // printf("processID = %d\n",processID);
-    }
-    // printf("Fcuk %d is here\n",processID);
-    
-    for(int i=0; i<NumProcesses-1;i++){
-        if(processID ==0 ){
-            vector<vector<int>> incoming(offset,vector<int>(columns));
-            MPI_Status status;
-            MPI_Recv(&(incoming[0][0]),offset*columns,MPI_INT,MPI_ANY_SOURCE,1,MPI_COMM_WORLD,&status);
-            // printf("the incoming message is from %d\n",status.MPI_SOURCE);
-            // Print(incoming);
-            // printf("from %d size is %d\n",status.MPI_SOURCE,incoming.size());
-            int start = status.MPI_SOURCE*offset;
-            for(int i = 0;i<offset;i++){
-                newBoard[start + i] = incoming[i];
+        if(processID != 0){
+            MPI_Send(&Result,offset*columns,MPI_INT, 0,1,MPI_COMM_WORLD);
+        }
+        
+        for(int i=0; i<NumProcesses-1;i++){
+            if(processID ==0 ){
+                int incoming [offset*columns];
+                MPI_Status status;
+                MPI_Recv(&incoming,offset*columns,MPI_INT,MPI_ANY_SOURCE,1,MPI_COMM_WORLD,&status);
+                int start = status.MPI_SOURCE*offset;
+                int k = 1;
+                for(int i = 0;i<offset*columns;i+=columns){
+                    vector<int> curr;
+                    for(int j = i; j < columns*k; j++){
+                        curr.push_back(incoming[j]);
+                    }
+                    newBoard[start] = curr;
+                    start++;
+                    k++;
+                }
+                
             }
-            
         }
-    }
-    if(processID == 0){
-        for(int i=0;i<offset;i++){
-            newBoard[i] = Result[i];
+        if(processID == 0){
+            int start = 0;
+            int k = 1;
+            for(int i = 0;i<offset*columns;i+=columns){
+                vector<int> curr;
+                for(int j = i; j < columns*k; j++){
+                    curr.push_back(Result[j]);
+                }
+                newBoard[start] = curr;
+                start++;
+                k++;
+            }
+            board = newBoard;
+            PrintBoard(newBoard,iteration);
         }
-        PrintBoard(newBoard,0);
+        MPI_Barrier(MPI_COMM_WORLD);
+        
     }
-    
 
 
     MPI_Finalize();
