@@ -255,7 +255,7 @@ int main(int argc, char * argv[]){
     // auto start = chrono::high_resolution_clock::now();
     MPI_Init(&argc, &argv);
     // processID will identify each process and offset will determine how many rows of the matrix are being processed per process
-    int processID,offset;
+    int processID,offset,next;
     MPI_Comm_rank(MPI_COMM_WORLD, &processID);
     offset = columns/NumProcesses;
     // arr will be used to store the 1d representation of the matrix after the first generation since it is broadcasted
@@ -269,6 +269,12 @@ int main(int argc, char * argv[]){
     if(processID != 0){
         startPos = processID * offset;
         endPos = startPos + offset;
+    }
+    if(processID == NumProcesses -1){
+        next = 0;
+    }
+    else{
+        next = processID + 1;
     }
     auto start = MPI_Wtime();
     // this outer for loop determines how many generations we run for
@@ -301,12 +307,13 @@ int main(int argc, char * argv[]){
             }
         }
         // We send Result, output of our computation, to process 0 that gathers them all and combines them
-        if(processID != 0){
+        if(processID == 0){
+            
             MPI_Send(&Result,offset*columns,MPI_INT, 0,1,MPI_COMM_WORLD);
         }
         // loop and receive data from all the processes 
-        for(int i=0; i<NumProcesses-1;i++){
-            if(processID ==0 ){
+        if(processID ==0 ){
+            for(int i=0; i<NumProcesses-1;i++){
                 int incoming [offset*columns];
                 MPI_Status status;
                 MPI_Recv(&incoming,offset*columns,MPI_INT,MPI_ANY_SOURCE,1,MPI_COMM_WORLD,&status);
@@ -321,9 +328,10 @@ int main(int argc, char * argv[]){
                     start++;
                     k++;
                 }
-                
             }
+            
         }
+        
         // after we receive all the data from other processes, we also need to add what process 0 computed to the board
         if(processID == 0){
             int start = 0;

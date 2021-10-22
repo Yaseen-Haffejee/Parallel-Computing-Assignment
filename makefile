@@ -1,7 +1,7 @@
 
 rows = 10
 columns = 10
-Processes =  5
+Processes =  2
 BoardGenerator: BoardGenerator.o
 	./BoardGenerator ${rows} ${columns}
 
