@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
+#include <chrono>
 using namespace std;
 int rows;
 int columns ;
@@ -202,23 +203,31 @@ int main(int argc, char * argv[]){
     rows = stoi(argv[1]);
     columns = stoi(argv[2]);
     vector<vector<int> >board = {
-        {1, 0, 1, 1, 1, 1, 0, 0, 1, 1, },
-        {0, 1, 0, 1, 1, 0, 0, 0, 0, 0, },
-        {1, 0, 1, 1, 0, 0, 0, 1, 1, 1, },
-        {1, 0, 0, 0, 1, 1, 1, 0, 1, 0, },
-        {1, 1, 1, 1, 0, 1, 0, 0, 1, 0, },
-        {1, 0, 1, 0, 0, 1, 0, 0, 0, 1, },
-        {1, 1, 0, 1, 0, 1, 0, 1, 1, 1, },
-        {0, 1, 0, 1, 0, 1, 0, 0, 1, 0, },
-        {1, 0, 0, 0, 0, 0, 1, 1, 0, 1, },
-        {0, 0, 0, 0, 1, 0, 0, 0, 0, 1, }
+    {1, 0, 1, 1, 1, 1, 0, 0, 1, 1, },
+{0, 1, 0, 1, 1, 0, 0, 0, 0, 0, },
+{1, 0, 1, 1, 0, 0, 0, 1, 1, 1, },
+{1, 0, 0, 0, 1, 1, 1, 0, 1, 0, },
+{1, 1, 1, 1, 0, 1, 0, 0, 1, 0, },
+{1, 0, 1, 0, 0, 1, 0, 0, 0, 1, },
+{1, 1, 0, 1, 0, 1, 0, 1, 1, 1, },
+{0, 1, 0, 1, 0, 1, 0, 0, 1, 0, },
+{1, 0, 0, 0, 0, 0, 1, 1, 0, 1, },
+{0, 0, 0, 0, 1, 0, 0, 0, 0, 1, }
+
+
 
 
     };
+    auto start = chrono::high_resolution_clock::now();
     for(int i = 0; i <5;i++){
         SerialConway(board);
         PrintBoard(board,i);
     }
-    
+    auto end = chrono::high_resolution_clock::now();
+    double timeTaken = chrono::duration_cast<chrono::duration<double>>(end - start).count();
+    ofstream File("SerialResult.txt", ios_base::app);
+    File<< "The total time taken is: ";
+    File<< timeTaken <<" seconds \n\n";
+
     return 0;
 }
