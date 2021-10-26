@@ -235,6 +235,12 @@ int main(int argc, char * argv[]){
     vector<vector<int>> board(Board);
     // auto start = MPI_Wtime();
     offset = rows/NumProcesses;
+    if(processID == 0){
+        if(rows%NumProcesses != 0){
+            cout<< "Please ensure that rows/processes(divide) is an integer and not a float.\n";
+            exit(0);
+        }
+    }
     // arr will be used to store the 1d representation of the matrix
     vector<int> arr(rows*columns);
     // startPos and endPos are where we start iterating from and end iterating in the matrix
