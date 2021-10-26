@@ -199,23 +199,42 @@ void PrintBoard(vector<vector<int>>&board, int iteration,int rows, int columns){
     Matrix.close();
 }
 
+vector<int> convert2dTo1D(vector<vector<int>>&board,int rows,int columns, bool S){
+    vector<int> Board(rows*columns);
+    int pos = 0;
+    for(int i =0;i<rows;i++){
 
-double SerialConway(int argc, char * argv[],vector<vector<int>>Board){
+        for(int j=0;j< columns; j++){
+            Board[pos] = board[i][j];
+            pos++;
+        }
+    }
+    return Board;
+}
+
+vector<vector<int>> SerialConway(int argc, char * argv[],vector<vector<int>>Board){
     // rows and columns are global integers defined right at the top
+    auto start = chrono::high_resolution_clock::now();
+    // results will store all the generations that are to come and returned to parallel program for comparison
+    vector<vector<int>> results;
     rows = stoi(argv[2]);
     columns = stoi(argv[3]);
     int iterations = stoi(argv[4]);
     vector<vector<int> >SerialBoard (Board);
-    auto start = chrono::high_resolution_clock::now();
     for(int i = 0; i <iterations;i++){
         Serialconway(SerialBoard);
-        PrintBoard(SerialBoard,i,rows,columns);
+        // if you want to see the serial results, uncomment the line below and the board of each generation gets printed to a file called SerialResult.txt
+        // PrintBoard(SerialBoard,i,rows,columns);
+        // convert 2d board to 1d
+        vector<int> oneD = convert2dTo1D(SerialBoard,rows,columns,true);
+        // add the new board to results 
+        results.push_back(oneD);
     }
     auto end = chrono::high_resolution_clock::now();
     double SerialTime = chrono::duration_cast<chrono::duration<double>>(end - start).count();
-    ofstream File("SerialResult.txt", ios_base::app);
-    File<< "The total time taken is: ";
-    File<< SerialTime <<" seconds \n\n";
+    // ofstream File("SerialResult.txt", ios_base::app);
+    // File<< "The total time taken is: ";
+    // File<< SerialTime <<" seconds \n\n";
 
-    return SerialTime;
+    return results ;
 }

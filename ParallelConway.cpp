@@ -8,9 +8,6 @@
 
 using namespace std;
 
-// please set the initial matrix here
-// We just copy the matrix from matrix.txt which will be generated when we run BoardGenerator
-
 // Method that will print each generation to a file
 void PrintBoard(vector<vector<int>>&board, int iteration,bool P,int rows, int columns){
     ofstream Matrix("ParallelResult.txt", ios_base::app);
@@ -25,33 +22,6 @@ void PrintBoard(vector<vector<int>>&board, int iteration,bool P,int rows, int co
     }
     Matrix<<"\n";
     Matrix.close();
-}
-void Print(vector<vector<int>>&b){
-    for(auto a : b){
-        for(auto x : a){
-            cout<<x<<" ";
-        }
-        cout<<endl;
-    }
-    cout<<endl;
-}
-void Print(vector<int>&m){
-    for(auto x : m){
-        cout<<x<<" ";
-    }
-    cout<<endl;
-}
-void Print(vector<int>m,int rows, int columns){
-    int r = 1;
-    for(int i=0 ; i<rows*columns;i+=columns ){
-        vector<int> tmp;
-        for(int j =i;j<columns*r;j++){
-            cout<<m[j]<<", ";
-        }
-        cout<<endl;
-        r++;
-    }
-    cout<<endl;
 }
 // Method to convert 2d vector into 1d vector for broadcasting
 vector<int> convert2dTo1D(vector<vector<int>>&board,int rows,int columns){
@@ -79,72 +49,6 @@ vector<vector<int>> convert1dT2D(vector<int> ptr,int rows,int columns){
         Board.push_back(tmp);
     }
     return Board;
-}
-// Get the number of neighbours that are alive given a board and the position on the board
-int NumAliveNeighours(vector<int>&board,int row,int col, int rows, int columns){
-    int startIndex =  row * rows;
-    int Position = startIndex + col;
-    int count = 0;
-    int actualRows = rows - 1;
-    int actualCols = columns - 1;
-    int left = 0, right = 0, up = 0, down = 0,diagonalLeftUp = 0, diagonalRightUp = 0, diagonalLeftDown = 0, diagonalRightDown = 0;
-    if(col > 0){
-        left = board[Position - 1];
-    }
-    if(col<actualCols){
-        right = board[Position + 1];
-    }
-    if(row > 0){
-        int pos = ((row-1)*rows) + col;
-        up  = board[pos];
-    }
-    if(row < actualRows){
-        int pos = ((row+1)*rows) + col ;
-        down =  board[pos];
-    }
-    if(col < actualCols && row >0){
-        int pos = ((row-1)*rows) +(col+1);
-        diagonalRightUp =  board[pos];
-    }
-    if(col > 0 && row >0){
-        int pos = ((row-1)*rows) +(col-1);
-        diagonalLeftUp = board[pos];
-    }
-    if(col < actualCols && row<actualRows){
-        int pos = ((row+1)*rows) +(col+1);
-        diagonalRightDown = board[pos];
-    }
-    if(col > 0 && row <actualRows){
-        int pos = ((row+1)*rows) +(col-1);
-        diagonalLeftDown =  board[pos];
-    }
-    if(up){
-        count ++;
-    }
-    if(down){
-        count ++;
-    } 
-    if(left){
-        count ++;
-    }
-    if(right){
-        count ++;
-    }
-    if(diagonalRightUp){
-        count ++;
-    }
-    if(diagonalRightDown){
-        count ++;
-    } 
-    if(diagonalLeftUp){
-        count ++;
-    } 
-    if(diagonalLeftDown){
-        count ++;
-    }
-
-    return count;
-    
 }
 // Get the number of neighbours that are alive given a board and the position on the board
 int NumberOfLiveNeighbours(vector<vector<int>>&board,int row,int col, int rows, int columns,bool p){
@@ -309,13 +213,25 @@ int main(int argc, char * argv[]){
     MPI_Init(&argc, &argv);
     // processID will identify each process and offset will determine how many rows of the matrix are being processed per process
     int processID,offset,next;
-    double TotalTime,SerialTime;
+    double SerialTime = 0.0;
+    // SerialResults holds 1-D representations of the board after a serial iteration.
+    // Example: If we run 5 iterations, SerialResults will hold 5 board representations in 1-D format, each representation is the resulting board(new generation) after an iteration
+    vector<vector<int>>SerialResults;
     MPI_Comm_rank(MPI_COMM_WORLD, &processID);
     if(processID ==0 ){
-        SerialTime = SerialConway(argc,argv,Board);
-        
+        // we let process 0 run the serial part and we time it
+        auto startSerial = chrono::high_resolution_clock::now();
+        // SerialConway returns the results in the vector forms, which we store in SerialResults as explained above
+        SerialResults = SerialConway(argc,argv,Board);
+        auto endSerial = chrono::high_resolution_clock::now();
+        // Store how long it took to complete the entire serial calculation
+        SerialTime = chrono::duration_cast<chrono::duration<double>>(endSerial - startSerial).count();
     }
+    // We place a barrier here, since we want all the processes to execute at the same time from the same point
+    // All the processes wait for processes 0 to complete the serial implementation before beginning the parallel one
     MPI_Barrier(MPI_COMM_WORLD);
+    // Start timing the parallel implementation
+    auto start = MPI_Wtime();
     vector<vector<int>> board(Board);
     // auto start = MPI_Wtime();
     offset = rows/NumProcesses;
@@ -329,7 +245,6 @@ int main(int argc, char * argv[]){
         startPos = processID * offset;
         endPos = startPos + offset;
     }
-    auto start = MPI_Wtime();
     // this outer for loop determines how many generations we run for
     for(int iteration=0;iteration<iters;iteration++){
         // need to reset the board to be the new Generation 
@@ -340,8 +255,6 @@ int main(int argc, char * argv[]){
         vector<int>Result;
         for(int i = startPos; i <endPos; i++){
             for(int j = 0; j < columns; j++){
-                // int index = (i*columns)+ j;
-                // int value = arr[index];
                 int value = board[i][j];
                 int aliveNeighbours = NumberOfLiveNeighbours(board,i,j,rows,columns,true);
                 // int aliveNeighbours = NumAliveNeighours(arr,i,j,rows,columns);
@@ -365,24 +278,44 @@ int main(int argc, char * argv[]){
         // all processes send their results and gather all of them into arr which will represent the next generation
         MPI_Allgather(&Result[0],offset*columns,MPI_INT,&arr[0],offset*columns,MPI_INT,MPI_COMM_WORLD);
         if(processID == 0){
+            // convert arr into 2d for process 0
             vector<vector<int>> b = convert1dT2D(arr,rows,columns);
+            // check that the SerialResult for the generation is the same as the parallel result
+            if(SerialResults[iteration] == arr){
+                printf("After iteration %d , the Serial and Parallel Results are Equal\n\n",iteration);
+            }
+            else{
+                printf("After iteration %d , the Serial and Parallel Results are NOT Equal\n\n",iteration);
+            }
             board = b ;
-            PrintBoard(b,iteration,true,rows,columns);
+            // If you would like to see each generation, uncomment the line below and the results are printed to a file called ParallelResult.txt
+            // PrintBoard(b,iteration,true,rows,columns);
         }
     }
-    // auto end = chrono::high_resolution_clock::now();
-    //  double timeTaken = chrono::duration_cast<chrono::duration<double>>(end - start).count();
+    // Stop the timing
     auto end = MPI_Wtime();
     auto timeTaken = end - start;
-    MPI_Reduce(&timeTaken,&TotalTime,1,MPI_DOUBLE,MPI_SUM,0,MPI_COMM_WORLD);
     if(processID == 0){
-    ofstream File("ParallelResult.txt", ios_base::app);
-    File<< "The total Serial time taken is: ";
-    File<< SerialTime<<" seconds \n\n";
-    File<< "The total Parallel time taken is: ";
-    File<< TotalTime/NumProcesses <<" seconds \n\n";
-    File<< "The total speedup is : ";
-    File<< SerialTime/(TotalTime/NumProcesses) <<" seconds \n\n";
+        // Serial Time and Parallel time is the average so we Divide it by iters which stores the number of iterations we did
+        ofstream File("Results.txt", ios_base::app);
+        File<<"Rows = "<< rows<< " Columns = "<< columns<<" Iterations = "<<iters<<" Processes = "<<NumProcesses<<endl;
+        cout<<"Rows = "<< rows<< " Columns = "<< columns<<" Iterations = "<<iters<<" Processes = "<<NumProcesses<<endl;
+        File<<"\n";
+        cout<<"\n";
+        File<< "The total Serial time taken is: ";
+        cout<< "The total Serial time taken is: ";
+        File<< SerialTime/iters<<" seconds \n\n";
+        cout<< SerialTime/iters<<" seconds \n\n";
+        File<< "The total Parallel time taken is: ";
+        cout<< "The total Parallel time taken is: ";
+        File<< (timeTaken)/iters <<" seconds \n\n";
+        cout<< (timeTaken)/iters <<" seconds \n\n";
+        File<< "The total speedup is : ";
+        cout<< "The total speedup is : ";
+        // Speed up is Serial/ Parallel
+        File<< (SerialTime)/(timeTaken) <<" seconds \n\n";
+        File<<"---------------------------------------------------------------\n\n";
+        cout<< (SerialTime)/(timeTaken) <<" seconds \n\n";
     }
     MPI_Finalize();
     return 0;
