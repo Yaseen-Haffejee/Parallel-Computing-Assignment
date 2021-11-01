@@ -29,4 +29,4 @@ Parallelconway.o : ParallelConway.cpp Conway.h
 	mpic++ -c ParallelConway.cpp
 
 clean: 
-	rm *conway *.txt BoardGenerator *.o final
+	rm -f *conway *.txt BoardGenerator *.o final

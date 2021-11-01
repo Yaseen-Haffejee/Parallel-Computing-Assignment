@@ -1,5 +1,10 @@
 *.txt
 *conway
 BoardGenerator
+GraphGenerator
+SerialDijkstra
+OMPDijkstra
+MPIDijkstra
+omp
 *.o
 final
