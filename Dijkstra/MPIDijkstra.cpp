@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <limits.h>
+#include <chrono>
 #include "Dijkstra.h"
 #include "mpi.h"
 
@@ -11,7 +12,6 @@ using namespace std;
 int main(int argc, char * argv[]){
     int processID;
     MPI_Init(NULL,NULL);
-    auto start = MPI_Wtime();
     // number of vertices is first argument
     int NumberOfVertices = atoi(argv[1]);
     // source vertex is the second argument
@@ -26,6 +26,7 @@ int main(int argc, char * argv[]){
 
     // get the rank of each process
     MPI_Comm_rank(MPI_COMM_WORLD,&processID);
+    auto start = MPI_Wtime();
     // calculate the range of vertices each process will calculate the local minimum distances for
     int startVertex = processID*offset;
     int endVertex = startVertex + offset;
@@ -59,11 +60,11 @@ int main(int argc, char * argv[]){
     auto ParallelTime = end - start;
     if(processID == 0){
         // start timing the serial portions
-        double SerialStart = MPI_Wtime();
-        // call the serial dijkstra with argc and argv since we also want it to read from the graph file etc for a fair comparison
-        vector<int> SerialResults = serialDijkstra(argc,argv);
-        double SerialEnd = MPI_Wtime();
-        double SerialTime = SerialEnd - SerialStart;
+        auto SerialStart = MPI_Wtime();
+        // call the serial dijkstra and time how long Serial Takes to compute result
+        vector<int> SerialResults = SerialDijkstra(AdjacencyMatrix,source,NumberOfVertices);
+        auto SerialEnd = MPI_Wtime();
+        auto SerialTime = SerialEnd - SerialStart;
         cout<<"-------------------------------------------------------------------------\n";
         cout<<"For a graph with "<< NumberOfVertices<<" vertices \n";
         cout<< "The source vertex is: "<<source<<endl;

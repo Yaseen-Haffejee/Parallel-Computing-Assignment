@@ -1,6 +1,10 @@
-vertices = 2560
-Processes = 10
+vertices = 6400
+Processes = 8
 source = 0
+
+All: GraphGenerator OpenMPDijkstra MPIDijkstra
+
+
 GraphGenerator:	GraphGeneratorBuild
 	./GraphGenerator ${vertices}
 
@@ -22,4 +26,4 @@ mpi: SerialDijkstra.cpp Dijkstra.h MPIDijkstra.cpp
 
 clean: 
 
-	rm -f *Dijkstra MPGraphGenerator *.txt *.o omp
+	rm -f *Dijkstra GraphGenerator *.txt *.o omp

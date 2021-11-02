@@ -4,7 +4,7 @@ columns = 5000
 Processes =  10
 iterations = 5
 
-final: Conway
+All: Conway
 	mpiexec -n ${Processes} ./final ${Processes} ${rows} ${columns} ${iterations}
 
 Conway: BoardGenerator.o Serialconway.o Parallelconway.o

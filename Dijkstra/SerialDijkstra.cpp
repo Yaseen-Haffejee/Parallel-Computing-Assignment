@@ -72,17 +72,5 @@ vector<int> SerialDijkstra(vector<vector<int>>& AdjacencyMatrix, int source,int 
         }
     }
 
-
     return distances;
-}
-vector<int> serialDijkstra(int argc, char * argv[]){
-    // Number of vertices passed in as the first agument 
-    int NumberOfVertices = atoi(argv[1]);
-    int source = atoi(argv[2]);
-    // Declare 2d matrix that will be the adjacency matrix
-    vector<vector<int> > AdjacencyMatrix(NumberOfVertices,vector<int>(NumberOfVertices));
-    //read from the file Graph.txt and store the adjacency matrix
-    ReadGraphFromTextFile(AdjacencyMatrix,NumberOfVertices);
-    vector<int> dis = SerialDijkstra(AdjacencyMatrix,source,NumberOfVertices);
-    return dis;
 }

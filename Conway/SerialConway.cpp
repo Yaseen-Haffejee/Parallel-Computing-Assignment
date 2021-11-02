@@ -214,7 +214,6 @@ vector<int> convert2dTo1D(vector<vector<int>>&board,int rows,int columns, bool S
 
 vector<vector<int>> SerialConway(int argc, char * argv[],vector<vector<int>>Board){
     // rows and columns are global integers defined right at the top
-    auto start = chrono::high_resolution_clock::now();
     // results will store all the generations that are to come and returned to parallel program for comparison
     vector<vector<int>> results;
     rows = stoi(argv[2]);
@@ -230,11 +229,6 @@ vector<vector<int>> SerialConway(int argc, char * argv[],vector<vector<int>>Boar
         // add the new board to results 
         results.push_back(oneD);
     }
-    auto end = chrono::high_resolution_clock::now();
-    double SerialTime = chrono::duration_cast<chrono::duration<double>>(end - start).count();
-    // ofstream File("SerialResult.txt", ios_base::app);
-    // File<< "The total time taken is: ";
-    // File<< SerialTime <<" seconds \n\n";
 
     return results ;
 }

@@ -86,7 +86,6 @@ vector<int> ParallelDijkstra(vector<vector<int>>&AdjacencyMatrix,int vertices,in
 
 int main(int argc, char * argv[]){
 
-    double ParallelStart = omp_get_wtime();
     // Number of vertices passed in as the first agument 
     int NumberOfVertices = atoi(argv[1]);
     // source node is the second argument
@@ -96,13 +95,15 @@ int main(int argc, char * argv[]){
 
     vector<vector<int> > AdjacencyMatrix(NumberOfVertices,vector<int>(NumberOfVertices));
     ReadGraphFromTextFile(AdjacencyMatrix,NumberOfVertices);
+    // start timing from start of algorithm
+    double ParallelStart = omp_get_wtime();
     vector<int> d = ParallelDijkstra(AdjacencyMatrix,NumberOfVertices,source,NumberOfProcesses);
     double ParallelEnd = omp_get_wtime();
     double openMPtime = ParallelEnd - ParallelStart;
     // Start timing the serial portion
     double SerialStart = omp_get_wtime();
-    // send argc and argv since we want the serial to also be timed for reading the board etc
-    vector<int>SerialResults = serialDijkstra(argc,argv);
+    // only time taken to compute results in Serial
+    vector<int>SerialResults = SerialDijkstra(AdjacencyMatrix,source,NumberOfVertices);
     double SerialEnd = omp_get_wtime();
     double SerialTime = SerialEnd - SerialStart;
     cout<<"-------------------------------------------------------------------------\n";
