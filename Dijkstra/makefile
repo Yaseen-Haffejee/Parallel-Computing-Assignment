@@ -1,5 +1,5 @@
-vertices = 6400
-Processes = 8
+vertices = 3200
+Processes = 4
 source = 0
 
 All: GraphGenerator OpenMPDijkstra MPIDijkstra

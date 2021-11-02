@@ -26,7 +26,6 @@ int main(int argc, char * argv[]){
 
     // get the rank of each process
     MPI_Comm_rank(MPI_COMM_WORLD,&processID);
-    auto start = MPI_Wtime();
     // calculate the range of vertices each process will calculate the local minimum distances for
     int startVertex = processID*offset;
     int endVertex = startVertex + offset;
@@ -34,6 +33,7 @@ int main(int argc, char * argv[]){
     // Temp distances will be used to collect the result from MPI_Allreduce 
     vector<int> Tempdistances(NumberOfVertices);
     vector<bool>Visited(NumberOfVertices,false);
+    auto start = MPI_Wtime();
     // always initalize the distance at the source to be zero
     distances[source] = 0;
     int u;
@@ -58,7 +58,10 @@ int main(int argc, char * argv[]){
     auto end = MPI_Wtime();
     // end timing and get total time
     auto ParallelTime = end - start;
+    double TotalTime;
+    MPI_Reduce(&ParallelTime,&TotalTime,1,MPI_DOUBLE,MPI_SUM,0,MPI_COMM_WORLD);
     if(processID == 0){
+        double AverageParallelTime = TotalTime/NumProcesses;
         // start timing the serial portions
         auto SerialStart = MPI_Wtime();
         // call the serial dijkstra and time how long Serial Takes to compute result
@@ -74,8 +77,8 @@ int main(int argc, char * argv[]){
         if(distances == SerialResults){
             cout<<"The Serial and Parallel Results are Equal \n";
             cout<<"The Serial Time is: "<<SerialTime<<endl;
-            cout<<"The Parallel Time is: "<<ParallelTime<<endl;
-            cout<<"The Speedup is: "<<(SerialTime/ParallelTime)<<endl;
+            cout<<"The Parallel Time is: "<<AverageParallelTime<<endl;
+            cout<<"The Speedup is: "<<(SerialTime/AverageParallelTime)<<endl;
         }
         else{
             cout<<"The Serial and Parallel Results are not equal \n\n";

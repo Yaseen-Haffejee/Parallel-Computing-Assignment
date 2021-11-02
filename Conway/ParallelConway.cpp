@@ -149,17 +149,20 @@ int main(int argc, char * argv[]){
     // Stop the timing
     auto end = MPI_Wtime();
     auto timeTaken = end - start;
+    double totalTime;
+    MPI_Reduce(&timeTaken,&totalTime,1,MPI_DOUBLE,MPI_SUM,0,MPI_COMM_WORLD);
     if(processID == 0){
+        double AverageParallelTime  = totalTime/NumProcesses;
         // Serial Time and Parallel time is the average so we Divide it by iters which stores the number of iterations we did
         cout<<"Rows = "<< rows<< " Columns = "<< columns<<" Iterations = "<<iters<<" Processes = "<<NumProcesses<<endl;
         cout<<"\n";
         cout<< "The total Serial time taken is: ";
         cout<< SerialTime/iters<<" seconds \n\n";
         cout<< "The total Parallel time taken is: ";
-        cout<< (timeTaken)/iters <<" seconds \n\n";
+        cout<< (AverageParallelTime)/iters <<" seconds \n\n";
         cout<< "The total speedup is : ";
         // Speed up is Serial/ Parallel
-        cout<< (SerialTime)/(timeTaken) <<" seconds \n\n";
+        cout<< (SerialTime)/(AverageParallelTime) <<" seconds \n\n";
     }
     MPI_Finalize();
     return 0;
