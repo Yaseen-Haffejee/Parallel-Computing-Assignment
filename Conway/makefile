@@ -1,6 +1,6 @@
 
-rows = 1000
-columns = 1000
+rows = 5000
+columns = 5000
 Processes =  4
 iterations = 5
 

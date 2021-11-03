@@ -68,20 +68,42 @@ int main(int argc, char * argv[]){
         vector<int> SerialResults = SerialDijkstra(AdjacencyMatrix,source,NumberOfVertices);
         auto SerialEnd = MPI_Wtime();
         auto SerialTime = SerialEnd - SerialStart;
+
+        // time and run the openmp implementation
+        auto startOpenMP = MPI_Wtime();
+        vector<int>OpenMPResults = ParallelDijkstra(AdjacencyMatrix,NumberOfVertices,source,NumProcesses);
+        auto endOpenMP = MPI_Wtime();
+        auto OpenMPTime = endOpenMP - startOpenMP;
+
+
         cout<<"-------------------------------------------------------------------------\n";
         cout<<"For a graph with "<< NumberOfVertices<<" vertices \n";
         cout<< "The source vertex is: "<<source<<endl;
         cout<<"The number of processes used is: "<<NumProcesses<<endl;
-        cout<<endl;
+        cout<<"-------------------------------------------------------------------------\n";
         // check if the serial Result (distances calculated in serial) is the same as the parallel
-        if(distances == SerialResults){
+        if(distances == SerialResults && OpenMPResults == SerialResults){
             cout<<"The Serial and Parallel Results are Equal \n";
+            cout<<"-------------------------------------------------------------------------\n";
             cout<<"The Serial Time is: "<<SerialTime<<endl;
-            cout<<"The Parallel Time is: "<<AverageParallelTime<<endl;
-            cout<<"The Speedup is: "<<(SerialTime/AverageParallelTime)<<endl;
+            cout<<"-------------------------------------------------------------------------\n";
+            cout<<"The MPI Parallel Time is: "<<AverageParallelTime<<endl;
+            cout<<"The MPI Speedup is: "<<(SerialTime/AverageParallelTime)<<endl;
+            cout<<"-------------------------------------------------------------------------\n";
+            cout<<"The OpenMP Parallel Time is: "<<OpenMPTime<<endl;
+            cout<<"The OpenMP Speedup is: "<<(SerialTime/OpenMPTime)<<endl;
         }
         else{
-            cout<<"The Serial and Parallel Results are not equal \n\n";
+            if(distances != SerialResults){
+                cout<<"The MPI output is incorrect but the OpenMP output is correct\n\n";
+            }
+            else if(distances != OpenMPResults){
+                 cout<<"The MPI output is correct but the OpenMP output is incorrect\n\n";
+            }
+            else{
+                cout<<"The Serial and Parallel Results are not equal \n\n";
+            }
+            
         }
         cout<<"-------------------------------------------------------------------------\n";
     }

@@ -1,9 +1,10 @@
-vertices = 3200
+vertices = 1500
 Processes = 4
 source = 0
 
 All: GraphGenerator OpenMPDijkstra MPIDijkstra
 
+all: GraphGenerator MPIDijkstra
 
 GraphGenerator:	GraphGeneratorBuild
 	./GraphGenerator ${vertices}
@@ -21,8 +22,8 @@ openmp: SerialDijkstra.cpp Dijkstra.h OpenMPDijkstra.cpp
 MPIDijkstra: mpi
 	mpiexec -n ${Processes} ./MPIDijkstra ${vertices} ${source} ${Processes}
 
-mpi: SerialDijkstra.cpp Dijkstra.h MPIDijkstra.cpp
-	mpic++ -o MPIDijkstra SerialDijkstra.cpp MPIDijkstra.cpp
+mpi: SerialDijkstra.cpp OpenMPDijkstra.cpp Dijkstra.h MPIDijkstra.cpp
+	mpic++ -o MPIDijkstra SerialDijkstra.cpp -fopenmp OpenMPDijkstra.cpp MPIDijkstra.cpp
 
 clean: 
 

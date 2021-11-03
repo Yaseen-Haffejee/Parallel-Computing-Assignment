@@ -84,47 +84,47 @@ vector<int> ParallelDijkstra(vector<vector<int>>&AdjacencyMatrix,int vertices,in
 
 }
 
-int main(int argc, char * argv[]){
+// int main(int argc, char * argv[]){
 
-    // Number of vertices passed in as the first agument 
-    int NumberOfVertices = atoi(argv[1]);
-    // source node is the second argument
-    int source = atoi(argv[2]);
-    // Number of processes is third agument
-    int NumberOfProcesses = atoi(argv[3]);
+//     // Number of vertices passed in as the first agument 
+//     int NumberOfVertices = atoi(argv[1]);
+//     // source node is the second argument
+//     int source = atoi(argv[2]);
+//     // Number of processes is third agument
+//     int NumberOfProcesses = atoi(argv[3]);
 
-    vector<vector<int> > AdjacencyMatrix(NumberOfVertices,vector<int>(NumberOfVertices));
-    ReadGraphFromTextFile(AdjacencyMatrix,NumberOfVertices);
-    // start timing from start of algorithm
-    double ParallelStart = omp_get_wtime();
-    vector<int> d = ParallelDijkstra(AdjacencyMatrix,NumberOfVertices,source,NumberOfProcesses);
-    double ParallelEnd = omp_get_wtime();
-    double openMPtime = ParallelEnd - ParallelStart;
-    // Start timing the serial portion
-    double SerialStart = omp_get_wtime();
-    // only time taken to compute results in Serial
-    vector<int>SerialResults = SerialDijkstra(AdjacencyMatrix,source,NumberOfVertices);
-    double SerialEnd = omp_get_wtime();
-    double SerialTime = SerialEnd - SerialStart;
-    cout<<"-------------------------------------------------------------------------\n";
-    cout<<"For a graph with "<< NumberOfVertices<<" vertices \n";
-    cout<< "The source vertex is: "<<source<<endl;
-    cout<<"The number of processes used is: "<<NumberOfProcesses<<endl;
-    cout<<endl;
-    // check if the serial result( distances produced by serial code) is the same as result produced by openmp code
-    if(SerialResults == d){
-        cout<<"The Serial and Parallel Results are Equal \n";
-        cout<<"The Serial Time is: "<<SerialTime<<endl;
-        cout<<"The Parallel Time is: "<<openMPtime<<endl;
-        cout<<"The Speedup is: "<<(SerialTime/openMPtime)<<endl;
-    }
-    else{
-        cout<<"The Serial and Parallel Results are not equal \n\n";
-    }
-    cout<<"-------------------------------------------------------------------------\n";
-
-
+//     vector<vector<int> > AdjacencyMatrix(NumberOfVertices,vector<int>(NumberOfVertices));
+//     ReadGraphFromTextFile(AdjacencyMatrix,NumberOfVertices);
+//     // start timing from start of algorithm
+//     double ParallelStart = omp_get_wtime();
+//     vector<int> d = ParallelDijkstra(AdjacencyMatrix,NumberOfVertices,source,NumberOfProcesses);
+//     double ParallelEnd = omp_get_wtime();
+//     double openMPtime = ParallelEnd - ParallelStart;
+//     // Start timing the serial portion
+//     double SerialStart = omp_get_wtime();
+//     // only time taken to compute results in Serial
+//     vector<int>SerialResults = SerialDijkstra(AdjacencyMatrix,source,NumberOfVertices);
+//     double SerialEnd = omp_get_wtime();
+//     double SerialTime = SerialEnd - SerialStart;
+//     cout<<"-------------------------------------------------------------------------\n";
+//     cout<<"For a graph with "<< NumberOfVertices<<" vertices \n";
+//     cout<< "The source vertex is: "<<source<<endl;
+//     cout<<"The number of processes used is: "<<NumberOfProcesses<<endl;
+//     cout<<endl;
+//     // check if the serial result( distances produced by serial code) is the same as result produced by openmp code
+//     if(SerialResults == d){
+//         cout<<"The Serial and Parallel Results are Equal \n";
+//         cout<<"The Serial Time is: "<<SerialTime<<endl;
+//         cout<<"The Parallel Time is: "<<openMPtime<<endl;
+//         cout<<"The Speedup is: "<<(SerialTime/openMPtime)<<endl;
+//     }
+//     else{
+//         cout<<"The Serial and Parallel Results are not equal \n\n";
+//     }
+//     cout<<"-------------------------------------------------------------------------\n";
 
 
-    return 0;
-}
+
+
+//     return 0;
+// }

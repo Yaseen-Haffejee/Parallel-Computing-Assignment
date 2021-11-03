@@ -65,6 +65,7 @@ int main(int argc, char * argv[]){
     // SerialResults holds 1-D representations of the board after a serial iteration.
     // Example: If we run 5 iterations, SerialResults will hold 5 board representations in 1-D format, each representation is the resulting board(new generation) after an iteration
     vector<vector<int>>SerialResults;
+    vector<vector<int>>ParallelResults;
     MPI_Comm_rank(MPI_COMM_WORLD, &processID);
     if(processID ==0 ){
         // we let process 0 run the serial part and we time it
@@ -111,7 +112,6 @@ int main(int argc, char * argv[]){
             for(int j = 0; j < columns; j++){
                 int value = board[i][j];
                 int aliveNeighbours = NumberOfLiveNeighbours(board,i,j,rows,columns);
-                // int aliveNeighbours = NumAliveNeighours(arr,i,j,rows,columns);
                 // if the cell is alive with two or three neighbours, it remains alive
                 if(value==1 &&(aliveNeighbours ==2 || aliveNeighbours ==3)){
                     Result.push_back(1);
@@ -132,15 +132,10 @@ int main(int argc, char * argv[]){
         // all processes send their results and gather all of them into arr which will represent the next generation
         MPI_Allgather(&Result[0],offset*columns,MPI_INT,&arr[0],offset*columns,MPI_INT,MPI_COMM_WORLD);
         if(processID == 0){
+            // add the parallel result to the vector storing parallel results.
+            ParallelResults.push_back(arr);
             // convert arr into 2d for process 0
             vector<vector<int>> b = convert1dT2D(arr,rows,columns);
-            // check that the SerialResult for the generation is the same as the parallel result
-            if(SerialResults[iteration] == arr){
-                printf("After iteration %d , the Serial and Parallel Results are Equal\n\n",iteration);
-            }
-            else{
-                printf("After iteration %d , the Serial and Parallel Results are NOT Equal\n\n",iteration);
-            }
             board = b ;
             // If you would like to see each generation, uncomment the line below and the results are printed to a file called ParallelResult.txt
             // PrintBoard(b,iteration,true,rows,columns);
@@ -152,6 +147,18 @@ int main(int argc, char * argv[]){
     double totalTime;
     MPI_Reduce(&timeTaken,&totalTime,1,MPI_DOUBLE,MPI_SUM,0,MPI_COMM_WORLD);
     if(processID == 0){
+        cout<<"-------------------------------------------------------------------------\n";
+        for(int i =0;i<iters;i++){
+            // check that the SerialResult for the generation is the same as the parallel result
+            if(SerialResults[i] == ParallelResults[i]){
+                printf("After iteration %d , the Serial and Parallel Results are Equal\n\n",i);
+            }
+            else{
+                printf("After iteration %d , the Serial and Parallel Results are NOT Equal\n\n",i);
+            }
+            // If you would like to see each generation, uncomment the line below and the results are printed to a file called ParallelResult.txt
+            // PrintBoard(b,iteration,true,rows,columns);
+        }
         double AverageParallelTime  = totalTime/NumProcesses;
         // Serial Time and Parallel time is the average so we Divide it by iters which stores the number of iterations we did
         cout<<"Rows = "<< rows<< " Columns = "<< columns<<" Iterations = "<<iters<<" Processes = "<<NumProcesses<<endl;
@@ -163,6 +170,8 @@ int main(int argc, char * argv[]){
         cout<< "The total speedup is : ";
         // Speed up is Serial/ Parallel
         cout<< (SerialTime)/(AverageParallelTime) <<" seconds \n\n";
+        cout<<"-------------------------------------------------------------------------\n";
+
     }
     MPI_Finalize();
     return 0;

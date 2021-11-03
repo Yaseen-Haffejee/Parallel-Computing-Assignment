@@ -12,7 +12,7 @@
 # specify the wall clock time limit for the job (hh:mm:ss) 5 mins
 ##SBATCH -t 5:00
 # specify the job name
-#SBATCH -J PC_Assignment_Conway
+#SBATCH -J PC_Assignment_Dijkstra
 # specify the filename to be used for writing output 
 # change the path for your own account here
 #SBATCH -o /home-mscluster/yhaffejee/Assignment/Dijkstra/output/%N.%j.out
