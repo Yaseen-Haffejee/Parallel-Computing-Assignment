@@ -224,7 +224,7 @@ vector<vector<int>> SerialConway(int argc, char * argv[],vector<vector<int>>Boar
         Serialconway(SerialBoard);
         // if you want to see the serial results, uncomment the line below and the board of each generation gets printed to a file called SerialResult.txt
         // PrintBoard(SerialBoard,i,rows,columns);
-        // convert 2d board to 1d
+        // convert 2d board to 1d since we have to return 1-d representation of the board to the parallel version to compare results
         vector<int> oneD = convert2dTo1D(SerialBoard,rows,columns,true);
         // add the new board to results 
         results.push_back(oneD);

@@ -1,7 +1,7 @@
 
-rows = 5000
-columns = 5000
-Processes =  10
+rows = 1000
+columns = 1000
+Processes =  4
 iterations = 5
 
 All: Conway
