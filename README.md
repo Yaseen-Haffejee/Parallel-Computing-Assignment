@@ -2,7 +2,9 @@
 
 ### Mini-Project One: Conway's Game of Life
 
-In order to run everything just run: make All
+In order to run everything just run: make
+
+Note that a random matrix is generated using the rows and columns values which are set in the makefile. Also remember to adjust the number of processes as well before running make. Don't forget that the number of processes must be a factor of the number of rows.
 
 For this project my approach to parallelize the algorithm was as follows:
 
@@ -15,10 +17,11 @@ For this project my approach to parallelize the algorithm was as follows:
 7) In the beginning of the parallel section , we allow process 0 to implement the serial implementatin which can be found in SerialConway.cpp. We time this process and we place a barrier after it since we want all the processes to begin execution at the same time.
 8) One note to make is that the algorithm relies on the fact that , the number of rows divided by the number of processes has no remainder. i.e rows%processes = 0. If this is not the case, the program will print "`"Please ensure that rows/processes is an integer and not a float.`" and terminate.
 
-
 ### Mini-Project Two: Dijkstra's Algorithm
 
-In order to run everything just run: make All
+In order to run everything just run: make 
+
+Note that a graph is initally randomly generated. You can set the number of vertices within the makefile before you run make. You should also set the number of threads/processes there.
 
 #### OpenMP Implementation:
 
@@ -39,7 +42,6 @@ In order to run everything just run: make All
 14. We have another barrier since the next iteration uses the distances vector and it needs to be completely updated before utilising it again. Once each thread is done updating their local distances , we continue onto the next vertex and do so until all the vertices have been looped through.
 15. We then return the distances array which will contain the shortest distance from the source to every other vertex.
 16. After the parallel version is complete, we call the serial version and get the results and time it. We compare the serial result and the parallel result, if they are equal we output the times and the speedup.
-
 
 #### MPI Implementation:
 

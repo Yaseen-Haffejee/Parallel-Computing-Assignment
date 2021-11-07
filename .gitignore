@@ -8,4 +8,5 @@ MPIDijkstra
 omp
 *.o
 *.out
+*.pdf
 final
