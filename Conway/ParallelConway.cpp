@@ -151,10 +151,10 @@ int main(int argc, char * argv[]){
         for(int i =0;i<iters;i++){
             // check that the SerialResult for the generation is the same as the parallel result
             if(SerialResults[i] == ParallelResults[i]){
-                printf("After iteration %d , the Serial and Parallel Results are Equal\n\n",i);
+                cout<<"After iteration "<< i<< " , the Serial and Parallel Results are Equal\n\n";
             }
             else{
-                printf("After iteration %d , the Serial and Parallel Results are NOT Equal\n\n",i);
+               cout<<"After iteration "<< i<< " , the Serial and Parallel Results are NOT Equal\n\n";
             }
             // If you would like to see each generation, uncomment the line below and the results are printed to a file called ParallelResult.txt
             // PrintBoard(b,iteration,true,rows,columns);

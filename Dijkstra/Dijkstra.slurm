@@ -19,20 +19,6 @@
 # specify the filename for stderr
 # change the path for your own account here
 #SBATCH -e /home-mscluster/yhaffejee/Assignment/Dijkstra/error/%N.%j.err
-
-echo ------------------------------------------------------
-echo DATE: $(date)
-echo 'Job is running on nodes ' $SLURM_JOB_NODELIST
-echo ------------------------------------------------------
-echo SLURM: sbatch is running on $SLURM_SUBMIT_HOST
-echo SLURM: job ID is $SLURM_JOB_ID
-echo SLURM: submit directory is $SLURM_SUBMIT_DIR
-echo SLURM: number of nodes allocated is $SLURM_JOB_NUM_NODES
-echo SLURM: number of tasks is $SLURM_NTASKS
-echo SLURM: job name is $SLURM_JOB_NAME
-echo ------------------------------------------------------
-cd $SLURM_SUBMIT_DIR
-
 make clean
 
 make All

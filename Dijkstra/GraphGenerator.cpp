@@ -22,7 +22,12 @@ vector<vector<int>> GenerateGraph(int vertices){
 
         for(int j=0;j<vertices;j++){
             if(RandomEdge()){
-                Graph[i][j] = GenerateRandomWeight();
+                if(i ==j){
+                    Graph[i][j] = 0;
+                }
+                else{
+                    Graph[i][j] = GenerateRandomWeight();
+                }
             }
             else{
                 Graph[i][j] = 0;

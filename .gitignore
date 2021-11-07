@@ -7,4 +7,5 @@ OMPDijkstra
 MPIDijkstra
 omp
 *.o
+*.out
 final
