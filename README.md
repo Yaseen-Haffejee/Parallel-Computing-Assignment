@@ -6,6 +6,10 @@ In order to run everything just run: make
 
 Note that a random matrix is generated using the rows and columns values which are set in the makefile. Also remember to adjust the number of processes as well before running make. Don't forget that the number of processes must be a factor of the number of rows.
 
+### Serial Implementation:
+A function will take in the two-dimensional array which is the board , which is randomly generated. It also takes in the number of rows and columns that make up the board, as well as the number of generations we are computing. We then loop for each generation and compute the results of the next generation. Once we have the next generation, we convert the board to a one-dimensional representation, which we add to a vector. We then update the board to be the new generation and continue this until all the generations have been computed. The function will then return a vector , containing one-dimensional representations of each generation computed. This vector is used to compare and check if the parallel results are the same. 
+The actual computation of  a generation is simple. We loop through the entire board, every single entry, we look and check how many of its eight neighbours are alive or dead , and based on the rules of the game, we determine whether or not that cell will remain alive in the next generation. Once every entry is evaluated, we update the board to be the new generation. This is repeated for however many generations we are computing.
+
 For this project my approach to parallelize the algorithm was as follows:
 
 1) Reduce the two-dimensional board into multiple sub-boards using its rows. i.e decompose the matrix and hand each process it's own set of rows to work on.
@@ -22,6 +26,10 @@ For this project my approach to parallelize the algorithm was as follows:
 In order to run everything just run: make 
 
 Note that a graph is initally randomly generated. You can set the number of vertices within the makefile before you run make. You should also set the number of threads/processes there.
+
+### Serial Implementation:
+The serial implementation which is used as the baseline , is as follows. The function takes in the Adjacency Matrix , the source vertex and the number of vertices in total. We then create a distances vector which will store the distance from the source to each vertex, initially all these distances are large numbers besides the distance from the source to itself , which is 0. We also set up the Visited vector which states whether or not a vertex has been visited, initially all the entries are false.
+We then loop through each vertex and find the vertex with the shortest distance that has not been visited yet, we can call this vertex u. We then mark the vertex as visited. Thereafter, we loop through each vertex and check that if the current distance in the distance vector, i.e the distance from the source to this vertex,  is larger than the distance from the source vertex to the vertex u plus the distance from u to the current vertex. If it is larger , we update it to be this smaller distance. We do this for each vertex and then upon completion, we return the distance vector which will have the shortest distance from the source vertex to each vertex in the graph. This is used to compare the parallel results and ensure the parallel implementations are correct. 
 
 #### OpenMP Implementation:
 
